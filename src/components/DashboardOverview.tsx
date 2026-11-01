@@ -194,7 +194,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 {completedTasks}/{totalTasks} tasks
               </span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 mt-2">
+            <div
+              className="w-full bg-slate-100 rounded-full h-2 mt-2"
+              role="progressbar"
+              aria-label="Timeline task completion"
+              aria-valuemin={0}
+              aria-valuemax={totalTasks}
+              aria-valuenow={completedTasks}
+              aria-valuetext={`${taskProgressPct}% complete`}
+            >
               <div
                 className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${taskProgressPct}%` }}

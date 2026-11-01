@@ -20,16 +20,10 @@ export function formatCurrency(amount: number, currency: CurrencyCode = 'USD'): 
 export function formatDate(dateStr: string): string {
   if (!dateStr) return 'Not set';
   try {
-    const parts = dateStr.split('-');
-    let date: Date;
-    if (parts.length === 3 && parts[0].length === 4) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const day = parseInt(parts[2], 10);
-      date = new Date(year, month, day);
-    } else {
-      date = new Date(dateStr);
-    }
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+      ? parseLocalCalendarDate(dateStr)
+      : new Date(dateStr);
+    if (!date) return dateStr;
     if (isNaN(date.getTime())) return dateStr;
     return date.toLocaleDateString(undefined, {
       year: 'numeric',
@@ -49,27 +43,19 @@ export interface CountdownResult {
   statusText: string;
 }
 
-export function calculateCountdown(targetDateStr: string): CountdownResult {
+export function calculateCountdown(targetDateStr: string, now = new Date()): CountdownResult {
   if (!targetDateStr) {
     return { totalDays: 0, months: 0, days: 0, isPast: false, statusText: 'Date not set' };
   }
 
-  const parts = targetDateStr.split('-');
-  let target: Date;
-  if (parts.length === 3) {
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const day = parseInt(parts[2], 10);
-    target = new Date(year, month, day, 0, 0, 0, 0);
-  } else {
-    target = new Date(targetDateStr);
-  }
+  const target = /^\d{4}-\d{2}-\d{2}$/.test(targetDateStr)
+    ? parseLocalCalendarDate(targetDateStr)
+    : new Date(targetDateStr);
 
-  if (isNaN(target.getTime())) {
+  if (!target || isNaN(target.getTime())) {
     return { totalDays: 0, months: 0, days: 0, isPast: false, statusText: 'Invalid date' };
   }
 
-  const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
   const diffTime = target.getTime() - today.getTime();
   const totalDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
@@ -111,4 +97,16 @@ export function calculateCountdown(targetDateStr: string): CountdownResult {
     isPast: false,
     statusText: text,
   };
+}
+
+function parseLocalCalendarDate(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const date = new Date(year, month - 1, day, 0, 0, 0, 0);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+  return date;
 }

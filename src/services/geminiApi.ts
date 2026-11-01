@@ -4,24 +4,27 @@ import { isValidApiKeyFormat, sanitizeText, validateAndSanitizePlan } from '../u
 
 const API_KEY_STORAGE_KEY = 'planora_gemini_api_key';
 const REQUEST_TIMEOUT_MS = 15000;
+const API_KEY_HEADER = 'x-goog-api-key';
 
 export function getStoredApiKey(): string {
+  const environmentKey = import.meta.env.VITE_GEMINI_API_KEY || '';
   try {
-    const stored = localStorage.getItem(API_KEY_STORAGE_KEY) || import.meta.env.VITE_GEMINI_API_KEY || '';
-    if (stored && isValidApiKeyFormat(stored)) {
-      return stored;
+    const stored = localStorage.getItem(API_KEY_STORAGE_KEY);
+    if (stored !== null) {
+      return stored && isValidApiKeyFormat(stored) ? stored : '';
     }
-    return '';
   } catch {
-    return '';
+    // Continue with the build-time key when browser storage is unavailable.
   }
+  return isValidApiKeyFormat(environmentKey) ? environmentKey : '';
 }
 
 export function saveApiKey(key: string): boolean {
   try {
     const trimmed = key.trim();
     if (!trimmed) {
-      localStorage.removeItem(API_KEY_STORAGE_KEY);
+      // An empty override also lets a user disable a build-time VITE key.
+      localStorage.setItem(API_KEY_STORAGE_KEY, '');
       return true;
     }
     if (isValidApiKeyFormat(trimmed)) {
@@ -178,10 +181,10 @@ CRITICAL: Return ONLY a valid JSON object matching this structure with no conver
 
   try {
     const response = await fetchWithTimeout(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', [API_KEY_HEADER]: apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
@@ -277,10 +280,10 @@ Answer the user's question clearly, constructively, and formatted in clean markd
     ];
 
     const response = await fetchWithTimeout(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', [API_KEY_HEADER]: apiKey },
         body: JSON.stringify({
           contents: formattedContents,
           generationConfig: {

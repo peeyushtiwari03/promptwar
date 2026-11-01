@@ -103,7 +103,7 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-md shadow-lg border border-slate-700 flex items-center gap-2 text-xs font-medium animate-fade-in">
+        <div role="status" aria-live="polite" className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-md shadow-lg border border-slate-700 flex items-center gap-2 text-xs font-medium animate-fade-in">
           <Check className="w-4 h-4 text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
@@ -128,25 +128,46 @@ export const App: React.FC = () => {
           aria-label="Event Sections"
           className="bg-white rounded-lg border border-slate-200 p-1.5 overflow-x-auto flex items-center gap-1"
         >
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                role="tab"
-                aria-selected={isActive}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 cursor-pointer ${
-                  isActive
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
+          <div role="tablist" aria-label="Event planning sections" className="flex items-center gap-1">
+            {tabs.map((tab, index) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  id={`tab-${tab.id}`}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  onKeyDown={(event) => {
+                    const keySteps: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1 };
+                    if (event.key === 'Home' || event.key === 'End') {
+                      event.preventDefault();
+                      const nextTabId = tabs[event.key === 'Home' ? 0 : tabs.length - 1].id;
+                      setActiveTab(nextTabId);
+                      document.getElementById(`tab-${nextTabId}`)?.focus();
+                    } else if (keySteps[event.key]) {
+                      event.preventDefault();
+                      const nextIndex = (index + keySteps[event.key] + tabs.length) % tabs.length;
+                      const nextTabId = tabs[nextIndex].id;
+                      setActiveTab(nextTabId);
+                      document.getElementById(`tab-${nextTabId}`)?.focus();
+                    }
+                  }}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls="event-section-panel"
+                  tabIndex={isActive ? 0 : -1}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
 
           <div className="ml-auto pl-2 hidden lg:flex items-center gap-2 border-l border-slate-100">
             <button
@@ -161,7 +182,12 @@ export const App: React.FC = () => {
         </nav>
 
         {/* Tab Content Display */}
-        <section aria-label="Section Content">
+        <section
+          id="event-section-panel"
+          role="tabpanel"
+          aria-labelledby={`tab-${activeTab}`}
+          tabIndex={0}
+        >
           {activeTab === 'overview' && (
             <DashboardOverview
               plan={plan}

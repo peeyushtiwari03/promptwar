@@ -55,7 +55,15 @@ export const AccessibilityHub: React.FC<AccessibilityHubProps> = ({
         </div>
 
         {/* Inline Score */}
-        <p className="text-sm text-slate-600 font-medium whitespace-nowrap">
+        <p
+          className="text-sm text-slate-600 font-medium whitespace-nowrap"
+          role="progressbar"
+          aria-label="Accessibility checklist completion"
+          aria-valuemin={0}
+          aria-valuemax={totalCount}
+          aria-valuenow={verifiedCount}
+          aria-valuetext={`${scorePercent}% complete`}
+        >
           <span className="font-bold text-slate-900">{verifiedCount}/{totalCount}</span> verified{' '}
           <span className="text-slate-400">({scorePercent}%)</span>
         </p>

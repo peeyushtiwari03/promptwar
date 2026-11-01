@@ -22,6 +22,7 @@ import {
 } from '../types/event';
 
 const DANGEROUS_CSV_PREFIXES = ['=', '+', '-', '@', '\t', '\r'];
+const MAX_RAW_TEXT_LENGTH = 10000;
 
 const VALID_BUDGET_CATEGORIES: BudgetCategory[] = [
   'Venue & Rentals',
@@ -65,7 +66,7 @@ function isValidDate(value: unknown): value is string {
 export function sanitizeText(input: unknown): string {
   if (typeof input !== 'string') return '';
   
-  let sanitized = input.trim();
+  let sanitized = input.slice(0, MAX_RAW_TEXT_LENGTH).trim();
 
   // Recursively strip any HTML/XML tags
   let previous = '';

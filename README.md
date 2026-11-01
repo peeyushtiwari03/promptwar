@@ -2,7 +2,7 @@
 > An intelligent, context-aware GenAI planning assistant that empowers organizers to seamlessly coordinate **Weddings**, **Birthdays**, and **Community Events** with automated dynamic budgets, chronological timelines, vendor checklists, accessibility audits, and personalized creative concepts.
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-emerald?style=flat-square&logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Tests-32%20Passed-indigo?style=flat-square&logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-40%20Passed-indigo?style=flat-square&logo=vitest)](https://vitest.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ES2022-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-slate?style=flat-square)](LICENSE)
 [![Branch](https://img.shields.io/badge/Branch-main-green?style=flat-square&logo=git)](https://github.com/)
@@ -70,14 +70,15 @@ flowchart TD
 ## 4. Assumptions Made
 1. **Target User**: Intended for independent organizers, couples, birthday celebrants, or community volunteers who lack formal event planning training and need structured guidance.
 2. **Pricing Benchmarks**: Default heuristic cost allocations reflect realistic North American & international averages for independent venues and vendors.
-3. **Data Privacy**: All data is strictly persisted within the browser's `localStorage`. No user event details or API keys are stored on remote intermediary servers.
+3. **Data Privacy**: Event plans are stored in the browser. If a user enables live Gemini features, the relevant event context and API key are sent directly to Google's API; Planora does not proxy those requests.
 4. **Network Resilience**: Full functionality (all calculators, plans, mockups, filters, and offline chats) works completely without internet access or API credentials.
 
 ---
 
 ## 5. Security & Responsible Implementation
-- **Input Sanitization**: All user-provided titles, locations, and notes are sanitized against XSS attacks and HTML tag injection using custom regex filters.
-- **API Key Hygiene**: API keys are saved strictly to the client's `localStorage` (or optional local `.env`), never leaked to third-party endpoints.
+- **Input Handling**: User text is length-bounded and sanitized. The interface renders it as React text rather than raw HTML.
+- **API Key Handling**: User-entered keys are stored in browser storage and sent directly to Google in the `x-goog-api-key` header. A `VITE_GEMINI_API_KEY` is compiled into the public client bundle; use only a restricted key and do not use it for a production secret.
+- **Deployment Headers**: Vercel serves a restrictive Content Security Policy and standard browser security headers, including frame protection and MIME sniffing protection.
 - **Resource Protection**: Bounded request token limits and client-side defensive checks prevent excessive memory consumption or infinite loops.
 - **Content Moderation**: Prompt guidelines ensure safe, respectful, and inclusive event planning dialogue.
 
@@ -126,7 +127,8 @@ npm install
 
 # 3. (Optional) Configure Gemini API Key
 cp .env.example .env
-# Edit .env and supply your VITE_GEMINI_API_KEY, or simply enter it inside the app UI!
+# For local development only: VITE_ values are exposed in the browser bundle.
+# For production, use a restricted key entered by the user or a server-side proxy.
 
 # 4. Launch local development server
 npm run dev

@@ -1,4 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { 
   generateBudgetItems, 
   generateTimelineTasks, 
@@ -16,10 +18,14 @@ import {
   validateAndSanitizePlan 
 } from '../utils/validation';
 import { formatCurrency, formatDate, calculateCountdown } from '../utils/formatters';
-import { extractJsonFromText, getStoredApiKey, saveApiKey, generateOfflineChatResponse } from '../services/geminiApi';
+import { extractJsonFromText, getStoredApiKey, saveApiKey, generateOfflineChatResponse, generateAiEventPlan, sendChatMessage } from '../services/geminiApi';
 import { loadSavedPlan, savePlanToStorage, clearSavedPlan, PLAN_STORAGE_KEY } from '../services/storage';
 import { sanitizeFileName, generateBudgetCsvString } from '../services/exportUtils';
 import { BudgetItem, EventDetails } from '../types/event';
+import { EventWizardModal } from '../components/EventWizardModal';
+import { AccessibilityHub } from '../components/AccessibilityHub';
+import { VendorChecklist } from '../components/VendorChecklist';
+import deploymentConfig from '../../vercel.json';
 
 // Polyfill localStorage for node/vitest environment
 const mockStorage: Record<string, string> = {};
@@ -130,6 +136,11 @@ describe('Validation & Security Utilities', () => {
     expect(clean).toBe('alert("hack")Forest Wedding');
   });
 
+  it('should bound raw text before sanitizing and remove control characters', () => {
+    expect(sanitizeText(`${'a'.repeat(12000)}<script>alert(1)</script>`)).toBe('a'.repeat(2000));
+    expect(sanitizeText('hello\u0000world')).toBe('helloworld');
+  });
+
   it('should recursively strip nested and malformed HTML tags', () => {
     const nested = '<<SCRIPT>alert("nested")//<</SCRIPT>Clean Title';
     const clean = sanitizeText(nested);
@@ -161,6 +172,11 @@ describe('Validation & Security Utilities', () => {
     expect(safeAt).toBe('"\'@SUM(1+1)*cmd"');
     expect(safePlus).toBe('"\'+1234"');
     expect(safeNormal).toBe('"Normal Venue Rental"');
+  });
+
+  it('should neutralize formulas after whitespace and BOM prefixes', () => {
+    expect(sanitizeForCsv('  =SUM(A1:A2)')).toBe('"\'  =SUM(A1:A2)"');
+    expect(sanitizeForCsv('\uFEFF@SUM(1,2)')).toBe('"\'\uFEFF@SUM(1,2)"');
   });
 
   it('should validate API key formats properly', () => {
@@ -205,6 +221,16 @@ describe('Validation & Security Utilities', () => {
     }
   });
 
+  it('does not copy prototype-related keys from imported plans', () => {
+    const payload = JSON.parse(
+      '{"details":{"title":"Safe plan"},"__proto__":{"polluted":true},"constructor":{"prototype":{"polluted":true}}}'
+    ) as unknown;
+    const clean = validateAndSanitizePlan(payload);
+
+    expect(clean?.details.title).toBe('Safe plan');
+    expect(Object.prototype).not.toHaveProperty('polluted');
+  });
+
   it('should safely bound non-finite values in imported plans', () => {
     const plan = validateAndSanitizePlan({
       details: { guestCount: 'Infinity', totalBudget: 'NaN', date: '2026-02-30' },
@@ -224,6 +250,76 @@ describe('Validation & Security Utilities', () => {
     expect(result.isFeasible).toBe(false);
     expect(result.warning).toBeDefined();
     expect(result.advice).toBeDefined();
+  });
+});
+
+describe('Accessible UI markup', () => {
+  it('associates event form labels with inputs and exposes modal semantics', () => {
+    const html = renderToStaticMarkup(createElement(EventWizardModal, {
+      isOpen: true,
+      onClose: () => undefined,
+      onPlanCreated: () => undefined,
+    }));
+
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain('aria-modal="true"');
+    expect(html).toContain('for="event-title"');
+    expect(html).toContain('id="event-title"');
+    expect(html).toContain('for="event-date"');
+    expect(html).toContain('id="event-date"');
+    expect(html).toContain('aria-pressed="true"');
+  });
+
+  it('exposes the accessibility checklist state as labeled keyboard controls', () => {
+    const items = generateAccessibilityItems();
+    const html = renderToStaticMarkup(createElement(AccessibilityHub, {
+      items,
+      onToggleItem: () => undefined,
+    }));
+
+    expect(html).toContain('role="progressbar"');
+    expect(html).toContain('aria-label="Accessibility checklist completion"');
+    expect(html).toContain('role="checkbox"');
+    expect(html).toContain('aria-checked="true"');
+    expect(html).toContain('tabindex="0"');
+  });
+
+  it('renders vendor disclosure and checklist actions with native button semantics', () => {
+    const html = renderToStaticMarkup(createElement(VendorChecklist, {
+      vendors: [{
+        id: 'vendor-1',
+        category: 'Catering',
+        role: 'Food service',
+        vendorName: 'Garden Table',
+        status: 'researching',
+        quotedPrice: 0,
+        checklistItems: [{ text: 'Confirm allergen handling', done: false }],
+        aiQuestionsToAsk: ['Can you accommodate allergies?'],
+        redFlagsToWatch: ['No written allergen procedure'],
+      }],
+      currency: 'USD',
+      onUpdateVendors: () => undefined,
+    }));
+
+    expect(html).toContain('aria-expanded="true"');
+    expect(html).toContain('aria-controls="vendor-details-0"');
+    expect(html).toContain('id="vendor-details-0"');
+    expect(html).toContain('aria-label="Mark complete: Confirm allergen handling"');
+    expect(html).toContain('role="progressbar"');
+    expect(html).toContain('$0');
+  });
+});
+
+describe('Production security headers', () => {
+  it('sets a restrictive CSP and browser security headers on Vercel responses', () => {
+    const headers = deploymentConfig.headers[0].headers;
+    const headerValues = Object.fromEntries(headers.map(({ key, value }) => [key, value]));
+
+    expect(headerValues['Content-Security-Policy']).toContain("frame-ancestors 'none'");
+    expect(headerValues['Content-Security-Policy']).toContain('https://generativelanguage.googleapis.com');
+    expect(headerValues['X-Content-Type-Options']).toBe('nosniff');
+    expect(headerValues['X-Frame-Options']).toBe('DENY');
+    expect(headerValues['Referrer-Policy']).toBe('strict-origin-when-cross-origin');
   });
 });
 
@@ -329,30 +425,28 @@ describe('Formatting Utilities', () => {
     const formatted = formatDate('2026-11-20');
     expect(formatted).toContain('2026');
     expect(formatted).toContain('Nov');
+    expect(formatDate('2026-02-30')).toBe('2026-02-30');
   });
 
   it('computes countdown accurately for future, today, past and missing dates', () => {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 45);
-    const countdownFuture = calculateCountdown(futureDate.toISOString().split('T')[0]);
+    const fixedNow = new Date(2026, 10, 1, 12);
+    const countdownFuture = calculateCountdown('2026-12-16', fixedNow);
     expect(countdownFuture.isPast).toBe(false);
-    expect(countdownFuture.totalDays).toBeGreaterThanOrEqual(44);
+    expect(countdownFuture.totalDays).toBe(45);
 
-    const nowIso = new Date().toISOString().split('T')[0];
-    const countdownToday = calculateCountdown(nowIso);
+    const countdownToday = calculateCountdown('2026-11-01', fixedNow);
     expect(countdownToday.isPast).toBe(false);
     expect(countdownToday.totalDays).toBe(0);
     expect(countdownToday.statusText).toBe('Today is the big day!');
 
-    const pastDate = new Date();
-    pastDate.setDate(pastDate.getDate() - 10);
-    const countdownPast = calculateCountdown(pastDate.toISOString().split('T')[0]);
+    const countdownPast = calculateCountdown('2026-10-22', fixedNow);
     expect(countdownPast.isPast).toBe(true);
     expect(countdownPast.totalDays).toBe(10);
     expect(countdownPast.statusText).toContain('days ago');
 
     const countdownEmpty = calculateCountdown('');
     expect(countdownEmpty.statusText).toBe('Date not set');
+    expect(calculateCountdown('2026-02-30', fixedNow).statusText).toBe('Invalid date');
   });
 });
 
@@ -429,6 +523,29 @@ describe('Export Utilities', () => {
 });
 
 describe('Gemini API Service & Offline Response Engine', () => {
+  it('sends API keys in the auth header for both API features, never in request URLs', async () => {
+    const apiKey = 'AIzaSyD-12345678901234567890abcdefg';
+    saveApiKey(apiKey);
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('', { status: 503, statusText: 'Service Unavailable' })
+    );
+
+    try {
+      await generateAiEventPlan(weddingDetails);
+      await sendChatMessage([], generateEventPlan(weddingDetails), 'Give me a planning tip');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      for (const [url, options] of fetchSpy.mock.calls) {
+        expect(String(url)).not.toContain(apiKey);
+        expect(String(url)).not.toContain('?key=');
+        expect((options?.headers as Record<string, string>)['x-goog-api-key']).toBe(apiKey);
+      }
+    } finally {
+      fetchSpy.mockRestore();
+      saveApiKey('');
+    }
+  });
+
   it('manages API key storage and validation', () => {
     saveApiKey('');
     expect(getStoredApiKey()).toBe('');
@@ -440,6 +557,9 @@ describe('Gemini API Service & Offline Response Engine', () => {
 
     const invalidSaved = saveApiKey('too-short');
     expect(invalidSaved).toBe(false);
+
+    expect(saveApiKey('')).toBe(true);
+    expect(getStoredApiKey()).toBe('');
 
     // Clean up
     saveApiKey('');

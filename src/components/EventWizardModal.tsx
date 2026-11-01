@@ -12,6 +12,7 @@ import {
 import { EventDetails, EventType, EventVibe, CurrencyCode, FullEventPlan } from '../types/event';
 import { validateEventInput, analyzeBudgetFeasibility, sanitizeText } from '../utils/validation';
 import { generateAiEventPlan } from '../services/geminiApi';
+import { useModalAccessibility } from '../hooks/useModalAccessibility';
 
 interface EventWizardModalProps {
   isOpen: boolean;
@@ -49,6 +50,7 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
   
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const dialogRef = useModalAccessibility(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -63,17 +65,6 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
     setNotes(currentDetails?.notes || '');
     setErrorMsg(null);
   }, [isOpen, currentDetails]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -130,6 +121,8 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="wizard-modal-title"
+      ref={dialogRef}
+      tabIndex={-1}
     >
       <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden my-8">
         {/* Modal Header */}
@@ -159,15 +152,15 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5 text-xs max-h-[75vh] overflow-y-auto">
           {errorMsg && (
-            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+            <div role="alert" className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {/* 1. Choose Event Type */}
-          <div>
-            <label className="block text-slate-700 font-semibold mb-2">Event Vertical</label>
+          <fieldset>
+            <legend className="block text-slate-700 font-semibold mb-2">Event Vertical</legend>
             <div className="grid grid-cols-3 gap-3">
               {[
                 { type: 'wedding', label: 'Wedding', icon: <PartyPopper className="w-4 h-4 text-rose-500" /> },
@@ -177,6 +170,7 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
                 <button
                   type="button"
                   key={item.type}
+                  aria-pressed={eventType === item.type}
                   onClick={() => {
                     setEventType(item.type as EventType);
                     if (!title || title.includes('Wedding') || title.includes('Birthday') || title.includes('Event')) {
@@ -194,15 +188,17 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Title & Location */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Event Title</label>
+            <label htmlFor="event-title" className="block font-semibold text-slate-700 mb-1">Event Title</label>
               <input
+                id="event-title"
                 type="text"
                 required
+                maxLength={120}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Maya & Julian's Botanical Wedding"
@@ -210,9 +206,11 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
               />
             </div>
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">City or Venue Name</label>
+              <label htmlFor="event-location" className="block font-semibold text-slate-700 mb-1">City or Venue Name</label>
               <input
+                id="event-location"
                 type="text"
+                maxLength={200}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Sonoma Valley Winery, CA"
@@ -224,8 +222,9 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
           {/* Date, Guests, Budget, Currency */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Target Date</label>
+              <label htmlFor="event-date" className="block font-semibold text-slate-700 mb-1">Target Date</label>
               <input
+                id="event-date"
                 type="date"
                 required
                 value={date}
@@ -235,11 +234,12 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Guest Headcount</label>
+              <label htmlFor="event-guest-count" className="block font-semibold text-slate-700 mb-1">Guest Headcount</label>
               <input
+                id="event-guest-count"
                 type="number"
                 min="1"
-                max="10000"
+                max="100000"
                 required
                 value={guestCount}
                 onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
@@ -248,9 +248,10 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Total Target Budget</label>
+              <label htmlFor="event-budget" className="block font-semibold text-slate-700 mb-1">Total Target Budget</label>
               <div className="flex gap-2">
                 <select
+                  aria-label="Currency"
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
                   className="bg-slate-100 border border-slate-300 rounded-lg px-2 py-2 text-slate-700 font-semibold"
@@ -263,8 +264,10 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
                   <option value="AUD">A$</option>
                 </select>
                 <input
+                  id="event-budget"
                   type="number"
                   min="0"
+                  max="1000000000"
                   step="100"
                   required
                   value={budget}
@@ -284,13 +287,14 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
           )}
 
           {/* Aesthetic Vibe */}
-          <div>
-            <label className="block font-semibold text-slate-700 mb-2">Vibe & Aesthetic Tone</label>
+          <fieldset>
+            <legend className="block font-semibold text-slate-700 mb-2">Vibe & Aesthetic Tone</legend>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {VIBES.map((v) => (
                 <button
                   type="button"
                   key={v.id}
+                  aria-pressed={vibe === v.id}
                   onClick={() => setVibe(v.id)}
                   className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
                     vibe === v.id
@@ -303,14 +307,16 @@ export const EventWizardModal: React.FC<EventWizardModalProps> = ({
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Special Notes & Restrictions */}
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">
+              <label htmlFor="event-notes" className="block font-semibold text-slate-700 mb-1">
               Special Notes (Dietary needs, cultural traditions, specific wishes)
             </label>
             <textarea
+              id="event-notes"
+              maxLength={2000}
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

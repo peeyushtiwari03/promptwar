@@ -48,6 +48,7 @@ export const PersonalizedIdeas: React.FC<PersonalizedIdeasProps> = ({
           {['all', 'theme', 'menu', 'activity', 'decor', 'music'].map((cat) => (
             <button
               key={cat}
+              aria-pressed={activeCategory === cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-3 py-1.5 rounded-full font-medium transition-colors text-xs shrink-0 ${
                 activeCategory === cat

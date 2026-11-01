@@ -168,6 +168,7 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
           return (
             <button
               key={phase.id}
+              aria-pressed={selectedPhase === phase.id}
               onClick={() => setSelectedPhase(phase.id)}
               className={`px-3 py-1.5 rounded-full font-medium transition-colors shrink-0 flex items-center gap-1.5 ${
                 selectedPhase === phase.id
@@ -202,10 +203,12 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div className="sm:col-span-2">
-              <label className="block font-medium text-slate-700 mb-1">Title</label>
+              <label htmlFor="task-title" className="block font-medium text-slate-700 mb-1">Title</label>
               <input
+                id="task-title"
                 type="text"
                 required
+                maxLength={120}
                 placeholder="e.g. Officiant rehearsal walkthrough"
                 value={taskForm.title}
                 onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
@@ -214,8 +217,9 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
             </div>
 
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Phase</label>
+              <label htmlFor="task-phase" className="block font-medium text-slate-700 mb-1">Phase</label>
               <select
+                id="task-phase"
                 value={taskForm.phase}
                 onChange={(e) => setTaskForm({ ...taskForm, phase: e.target.value as TaskPhase })}
                 className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-800"
@@ -231,8 +235,9 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Due Date</label>
+              <label htmlFor="task-due-date" className="block font-medium text-slate-700 mb-1">Due Date</label>
               <input
+                id="task-due-date"
                 type="date"
                 value={taskForm.dueDate}
                 onChange={(e) => setTaskForm({ ...taskForm, dueDate: e.target.value })}
@@ -241,8 +246,10 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
             </div>
 
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Time Slot (For Day-Of)</label>
+              <label htmlFor="task-time-slot" className="block font-medium text-slate-700 mb-1">Time Slot (For Day-Of)</label>
               <input
+                id="task-time-slot"
+                maxLength={100}
                 type="text"
                 placeholder="e.g. 04:00 PM - 04:45 PM"
                 value={taskForm.timeSlot}
@@ -252,8 +259,9 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
             </div>
 
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Priority</label>
+              <label htmlFor="task-priority" className="block font-medium text-slate-700 mb-1">Priority</label>
               <select
+                id="task-priority"
                 value={taskForm.priority}
                 onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value as TaskPriority })}
                 className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-800"
@@ -266,8 +274,10 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
           </div>
 
           <div>
-            <label className="block font-medium text-slate-700 mb-1 text-xs">Description / Logistics Instructions</label>
+            <label htmlFor="task-description" className="block font-medium text-slate-700 mb-1 text-xs">Description / Logistics Instructions</label>
             <textarea
+              id="task-description"
+              maxLength={2000}
               rows={2}
               value={taskForm.description}
               onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}

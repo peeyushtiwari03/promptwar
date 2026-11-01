@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Key, ShieldCheck, Check, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { getStoredApiKey, saveApiKey } from '../services/geminiApi';
 import { isValidApiKeyFormat } from '../utils/validation';
+import { useModalAccessibility } from '../hooks/useModalAccessibility';
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   const [keyInput, setKeyInput] = useState(getStoredApiKey());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const dialogRef = useModalAccessibility(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -24,17 +26,6 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
     setErrorMessage(null);
     setSavedSuccess(false);
   }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -54,7 +45,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
       return;
     }
 
-    onKeySaved(trimmed);
+    onKeySaved(getStoredApiKey());
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);
@@ -63,10 +54,14 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   };
 
   const handleClear = () => {
-    saveApiKey('');
+    const cleared = saveApiKey('');
+    if (!cleared) {
+      setErrorMessage('Could not clear the saved key. Please check your browser settings.');
+      return;
+    }
     setKeyInput('');
     setErrorMessage(null);
-    onKeySaved('');
+    onKeySaved(getStoredApiKey());
   };
 
   return (
@@ -75,6 +70,8 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="api-key-modal-title"
+      ref={dialogRef}
+      tabIndex={-1}
     >
       <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
         {/* Header */}
@@ -100,7 +97,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-5 space-y-4 text-xs">
           {errorMessage && (
-            <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+            <div role="alert" className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{errorMessage}</span>
             </div>
@@ -120,10 +117,12 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">Gemini API Key</label>
+            <label htmlFor="gemini-api-key" className="block font-semibold text-slate-700 mb-1">Gemini API Key</label>
             <input
+              id="gemini-api-key"
               type="password"
-              placeholder="AIzaSy..."
+              placeholder="Paste your Gemini API key"
+              maxLength={80}
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 font-mono text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
@@ -154,7 +153,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
 
           <div className="flex items-center gap-2 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Stored in your browser. When you use live Gemini features, the key and request are sent directly to Google.</span>
+              <span>Stored in this browser. Live requests go directly to Google. Build-time VITE keys are included in the public app bundle; use a restricted key or leave this unset.</span>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">

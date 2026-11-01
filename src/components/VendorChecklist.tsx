@@ -121,7 +121,7 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
 
       {/* Vendor Cards Grid */}
       <div className="space-y-4">
-        {filteredVendors.map((vendor) => {
+        {filteredVendors.map((vendor, vendorIndex) => {
           const isExpanded = expandedVendorId === vendor.id;
           const completedTasks = vendor.checklistItems.filter((i) => i.done).length;
           const totalTasks = vendor.checklistItems.length;
@@ -132,33 +132,31 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
               className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs hover:border-slate-300 transition-colors"
             >
               {/* Header Strip */}
-              <div
-                role="button"
-                tabIndex={0}
-                aria-expanded={isExpanded}
-                onClick={() => setExpandedVendorId(isExpanded ? null : vendor.id)}
-                onKeyDown={(e) => {
-                  if (e.target !== e.currentTarget) return;
-                  if (e.key === ' ' || e.key === 'Enter') {
-                    e.preventDefault();
-                    setExpandedVendorId(isExpanded ? null : vendor.id);
-                  }
-                }}
-                className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/60 transition-colors focus:outline-hidden focus:ring-2 focus:ring-indigo-500 rounded-t-xl"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">
-                      {vendor.category}
-                    </span>
-                    <span className="text-xs text-slate-500">•</span>
-                    <span className="text-xs text-slate-600 font-medium">{vendor.role}</span>
+              <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  aria-controls={`vendor-details-${vendorIndex}`}
+                  onClick={() => setExpandedVendorId(isExpanded ? null : vendor.id)}
+                  className="flex flex-1 items-center justify-between gap-4 text-left cursor-pointer hover:bg-slate-50/60 transition-colors focus:outline-hidden focus:ring-2 focus:ring-indigo-500 rounded-lg"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">
+                        {vendor.category}
+                      </span>
+                      <span className="text-xs text-slate-500">•</span>
+                      <span className="text-xs text-slate-600 font-medium">{vendor.role}</span>
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900">{vendor.vendorName}</h3>
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">{vendor.vendorName}</h3>
-                </div>
+                  <span aria-hidden="true" className="text-slate-400 p-1 rounded-md">
+                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </span>
+                </button>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  {vendor.quotedPrice && (
+                  {vendor.quotedPrice !== undefined && (
                     <div className="text-right">
                       <span className="text-[10px] text-slate-400 block uppercase font-medium">Quote</span>
                       <span className="text-sm font-bold text-slate-800">
@@ -167,12 +165,13 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
                     </div>
                   )}
 
-                  {/* Status Dropdown */}
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <select
-                      value={vendor.status}
-                      onChange={(e) => handleStatusChange(vendor.id, e.target.value as VendorStatus)}
-                      className={`text-xs font-semibold py-1.5 px-3 rounded-full border cursor-pointer ${
+                  <label className="sr-only" htmlFor={`vendor-status-${vendorIndex}`}>Status for {vendor.vendorName}</label>
+                  <select
+                    id={`vendor-status-${vendorIndex}`}
+                    aria-label={`Status for ${vendor.vendorName}`}
+                    value={vendor.status}
+                    onChange={(e) => handleStatusChange(vendor.id, e.target.value as VendorStatus)}
+                    className={`text-xs font-semibold py-1.5 px-3 rounded-full border cursor-pointer ${
                         vendor.status === 'fully_paid' || vendor.status === 'contract_signed'
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : vendor.status === 'deposit_paid' || vendor.status === 'quoted'
@@ -185,22 +184,12 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
                           {STATUS_LABELS[st]}
                         </option>
                       ))}
-                    </select>
-                  </div>
-
-                  <button
-                    type="button"
-                    aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${vendor.vendorName}`}
-                    className="text-slate-400 p-1 rounded-md hover:bg-slate-100"
-                  >
-                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </button>
+                  </select>
                 </div>
               </div>
 
               {/* Collapsible Content */}
-              {isExpanded && (
-                <div className="px-5 pb-5 pt-2 border-t border-slate-100 space-y-5 bg-slate-50/40">
+              <div id={`vendor-details-${vendorIndex}`} hidden={!isExpanded} className="px-5 pb-5 pt-2 border-t border-slate-100 space-y-5 bg-slate-50/40">
                   {/* Progress bar */}
                   <div className="flex items-center justify-between text-xs text-slate-500 pt-2">
                     <span>Due Diligence Checklist</span>
@@ -208,7 +197,15 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
                       {completedTasks} of {totalTasks} items completed
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <div
+                    className="w-full bg-slate-200 rounded-full h-1.5"
+                    role="progressbar"
+                    aria-label={`${vendor.vendorName} checklist completion`}
+                    aria-valuemin={0}
+                    aria-valuemax={totalTasks}
+                    aria-valuenow={completedTasks}
+                    aria-valuetext={`${completedTasks} of ${totalTasks} items complete`}
+                  >
                     <div
                       className="bg-indigo-600 h-1.5 rounded-full transition-all"
                       style={{ width: `${totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0}%` }}
@@ -218,10 +215,13 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
                   {/* Checklist Items */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                     {vendor.checklistItems.map((item, idx) => (
-                      <div
+                      <button
+                        type="button"
                         key={idx}
+                        aria-pressed={item.done}
+                        aria-label={`${item.done ? 'Mark incomplete' : 'Mark complete'}: ${item.text}`}
                         onClick={() => handleToggleChecklist(vendor.id, idx)}
-                        className={`p-2.5 rounded-lg border flex items-center gap-2.5 cursor-pointer transition-colors ${
+                        className={`w-full text-left p-2.5 rounded-lg border flex items-center gap-2.5 cursor-pointer transition-colors ${
                           item.done
                             ? 'bg-emerald-50/50 border-emerald-200 text-slate-600 line-through'
                             : 'bg-white border-slate-200 text-slate-800 hover:border-indigo-300'
@@ -233,7 +233,7 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
                           <Square className="w-4 h-4 text-slate-400 shrink-0" />
                         )}
                         <span>{item.text}</span>
-                      </div>
+                      </button>
                     ))}
                   </div>
 
@@ -272,7 +272,6 @@ export const VendorChecklist: React.FC<VendorChecklistProps> = ({
                     </div>
                   </div>
                 </div>
-              )}
             </div>
           );
         })}

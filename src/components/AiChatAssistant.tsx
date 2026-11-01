@@ -209,6 +209,7 @@ How can I help optimize your event today? You can ask me to adjust budgets, gene
         >
           <input
             type="text"
+            aria-label="Message to Planora"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isTyping}

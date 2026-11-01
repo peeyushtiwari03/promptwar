@@ -254,6 +254,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
       {/* Category Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-2 text-xs">
         <button
+          aria-pressed={selectedCategory === 'all'}
           onClick={() => setSelectedCategory('all')}
           className={`px-3 py-1.5 rounded-full font-medium transition-colors shrink-0 ${
             selectedCategory === 'all'
@@ -269,6 +270,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
           return (
             <button
               key={cat}
+              aria-pressed={selectedCategory === cat}
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-full font-medium transition-colors shrink-0 ${
                 selectedCategory === cat
@@ -301,8 +303,9 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Category</label>
+              <label htmlFor="budget-category" className="block font-medium text-slate-700 mb-1">Category</label>
               <select
+                id="budget-category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value as BudgetCategory })}
                 className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-800"
@@ -314,21 +317,22 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
             </div>
 
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Item Name</label>
+              <label htmlFor="budget-name" className="block font-medium text-slate-700 mb-1">Item Name</label>
               <input
+                id="budget-name"
                 type="text"
                 required
                 placeholder="e.g. Wedding Cake Tasting"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-800"
-              >
-              </input>
+              />
             </div>
 
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Estimated Cost</label>
+              <label htmlFor="budget-estimated-cost" className="block font-medium text-slate-700 mb-1">Estimated Cost</label>
               <input
+                id="budget-estimated-cost"
                 type="number"
                 min="0"
                 step="any"
@@ -339,8 +343,9 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
             </div>
 
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Actual Paid</label>
+              <label htmlFor="budget-actual-cost" className="block font-medium text-slate-700 mb-1">Actual Paid</label>
               <input
+                id="budget-actual-cost"
                 type="number"
                 min="0"
                 step="any"
@@ -353,8 +358,9 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div>
-              <label className="block font-medium text-slate-700 mb-1">Payment Status</label>
+              <label htmlFor="budget-payment-status" className="block font-medium text-slate-700 mb-1">Payment Status</label>
               <select
+                id="budget-payment-status"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as PaymentStatus })}
                 className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-800"
@@ -366,8 +372,10 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block font-medium text-slate-700 mb-1">Notes / Vendor Details</label>
+              <label htmlFor="budget-notes" className="block font-medium text-slate-700 mb-1">Notes / Vendor Details</label>
               <input
+                id="budget-notes"
+                maxLength={2000}
                 type="text"
                 placeholder="Contract reference or terms"
                 value={formData.notes}
@@ -418,6 +426,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
                     <tr key={item.id} className="bg-indigo-50/40">
                       <td className="p-3">
                         <select
+                          aria-label={`Category for ${item.name}`}
                           value={formData.category}
                           onChange={(e) => setFormData({ ...formData, category: e.target.value as BudgetCategory })}
                           className="w-full p-1.5 border border-slate-300 rounded bg-white"
@@ -430,12 +439,14 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
                       <td className="p-3 space-y-1">
                         <input
                           type="text"
+                          aria-label={`Name for ${item.name}`}
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           className="w-full p-1.5 border border-slate-300 rounded bg-white font-medium"
                         />
                         <input
                           type="text"
+                          aria-label={`Notes for ${item.name}`}
                           placeholder="Notes"
                           value={formData.notes}
                           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -445,6 +456,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
                       <td className="p-3">
                         <input
                           type="number"
+                          aria-label={`Estimated cost for ${item.name}`}
                           value={formData.estimatedCost}
                           onChange={(e) => setFormData({ ...formData, estimatedCost: parseFloat(e.target.value) || 0 })}
                           className="w-24 p-1.5 border border-slate-300 rounded bg-white text-right"
@@ -453,6 +465,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
                       <td className="p-3">
                         <input
                           type="number"
+                          aria-label={`Actual cost for ${item.name}`}
                           value={formData.actualCost}
                           onChange={(e) => setFormData({ ...formData, actualCost: parseFloat(e.target.value) || 0 })}
                           className="w-24 p-1.5 border border-slate-300 rounded bg-white text-right"
@@ -460,6 +473,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
                       </td>
                       <td className="p-3">
                         <select
+                          aria-label={`Payment status for ${item.name}`}
                           value={formData.status}
                           onChange={(e) => setFormData({ ...formData, status: e.target.value as PaymentStatus })}
                           className="p-1.5 border border-slate-300 rounded bg-white"
