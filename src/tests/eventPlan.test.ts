@@ -18,7 +18,7 @@ import {
   validateAndSanitizePlan 
 } from '../utils/validation';
 import { addDaysToCalendarDate, formatCurrency, formatDate, calculateCountdown } from '../utils/formatters';
-import { extractJsonFromText, getStoredApiKey, saveApiKey, generateOfflineChatResponse, generateAiEventPlan, sendChatMessage } from '../services/geminiApi';
+import { extractJsonFromText, getApiKey, saveApiKey, generateOfflineChatResponse, generateAiEventPlan, sendChatMessage } from '../services/geminiApi';
 import { loadSavedPlan, savePlanToStorage, clearSavedPlan, PLAN_STORAGE_KEY } from '../services/storage';
 import { sanitizeFileName, generateBudgetCsvString } from '../services/exportUtils';
 import type { BudgetItem, EventDetails } from '../types/event';
@@ -545,6 +545,7 @@ describe('Gemini API Service & Offline Response Engine', () => {
       for (const [url, options] of fetchSpy.mock.calls) {
         expect(String(url)).not.toContain(apiKey);
         expect(String(url)).not.toContain('?key=');
+        expect(String(url)).toContain('/models/gemini-3.8-flash:generateContent');
         expect((options?.headers as Record<string, string>)['x-goog-api-key']).toBe(apiKey);
       }
     } finally {
@@ -553,23 +554,28 @@ describe('Gemini API Service & Offline Response Engine', () => {
     }
   });
 
-  it('manages API key storage and validation', () => {
+  it('keeps a valid API key in memory only and validates updates', () => {
     saveApiKey('');
-    expect(getStoredApiKey()).toBe('');
+    expect(getApiKey()).toBe('');
 
-    const validKey = 'AIzaSyD-12345678901234567890abcdefg';
-    const saved = saveApiKey(validKey);
-    expect(saved).toBe(true);
-    expect(getStoredApiKey()).toBe(validKey);
+    const storageWriteSpy = vi.spyOn(localStorage, 'setItem');
+    try {
+      const validKey = 'AIzaSyD-12345678901234567890abcdefg';
+      const saved = saveApiKey(validKey);
+      expect(saved).toBe(true);
+      expect(getApiKey()).toBe(validKey);
 
-    const invalidSaved = saveApiKey('too-short');
-    expect(invalidSaved).toBe(false);
+      const invalidSaved = saveApiKey('too-short');
+      expect(invalidSaved).toBe(false);
+      expect(getApiKey()).toBe(validKey);
 
-    expect(saveApiKey('')).toBe(true);
-    expect(getStoredApiKey()).toBe('');
-
-    // Clean up
-    saveApiKey('');
+      expect(saveApiKey('')).toBe(true);
+      expect(getApiKey()).toBe('');
+      expect(storageWriteSpy).not.toHaveBeenCalled();
+    } finally {
+      storageWriteSpy.mockRestore();
+      saveApiKey('');
+    }
   });
 
   it('extracts JSON cleanly from markdown code blocks and raw text', () => {

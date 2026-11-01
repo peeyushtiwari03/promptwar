@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, Key, ShieldCheck, Check, Info, ExternalLink, AlertTriangle } from 'lucide-react';
-import { getStoredApiKey, saveApiKey } from '../services/geminiApi';
+import { getApiKey, saveApiKey } from '../services/geminiApi';
 import { isValidApiKeyFormat } from '../utils/validation';
 import { useModalAccessibility } from '../hooks/useModalAccessibility';
 
@@ -15,14 +15,14 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   onClose,
   onKeySaved,
 }) => {
-  const [keyInput, setKeyInput] = useState(getStoredApiKey());
+  const [keyInput, setKeyInput] = useState(getApiKey());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const dialogRef = useModalAccessibility(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) return;
-    setKeyInput(getStoredApiKey());
+    setKeyInput(getApiKey());
     setErrorMessage(null);
     setSavedSuccess(false);
   }, [isOpen]);
@@ -41,11 +41,11 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
 
     const success = saveApiKey(trimmed);
     if (!success && trimmed) {
-      setErrorMessage('Could not store key. Please check your browser settings.');
+      setErrorMessage('Could not save this key in memory.');
       return;
     }
 
-    onKeySaved(getStoredApiKey());
+    onKeySaved(getApiKey());
     setSavedSuccess(true);
     setTimeout(() => {
       setSavedSuccess(false);
@@ -56,12 +56,12 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   const handleClear = () => {
     const cleared = saveApiKey('');
     if (!cleared) {
-      setErrorMessage('Could not clear the saved key. Please check your browser settings.');
+      setErrorMessage('Could not clear the key from memory.');
       return;
     }
     setKeyInput('');
     setErrorMessage(null);
-    onKeySaved(getStoredApiKey());
+    onKeySaved(getApiKey());
   };
 
   return (
@@ -112,7 +112,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
               Planora can build a local heuristic plan without an API key. Live Gemini responses require a key and an internet connection.
             </p>
             <p className="text-slate-600">
-              Adding a Gemini API key unlocks unconstrained real-time responses and live conversational reasoning with <code>gemini-2.0-flash</code>.
+              Adding a Gemini API key unlocks real-time planning and conversational responses with <code>gemini-3.8-flash</code>.
             </p>
           </div>
 
@@ -153,7 +153,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
 
           <div className="flex items-center gap-2 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Stored in this browser. Live requests go directly to Google. Build-time VITE keys are included in the public app bundle; use a restricted key or leave this unset.</span>
+              <span>This key stays in memory until you reload the page. Live requests go directly to Google in the x-goog-api-key header.</span>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">

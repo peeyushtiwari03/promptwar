@@ -2,42 +2,33 @@ import type { EventDetails, FullEventPlan, ChatMessage } from '../types/event';
 import { generateEventPlan } from './heuristicEngine';
 import { isValidApiKeyFormat, sanitizeText, validateAndSanitizePlan } from '../utils/validation';
 
-const API_KEY_STORAGE_KEY = 'planora_gemini_api_key';
 const REQUEST_TIMEOUT_MS = 15000;
 const API_KEY_HEADER = 'x-goog-api-key';
+const GEMINI_MODEL_ID = 'gemini-3.8-flash';
+const GEMINI_GENERATE_CONTENT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent`;
+const LEGACY_API_KEY_STORAGE_KEY = 'planora_gemini_api_key';
 
-export function getStoredApiKey(): string {
-  const environmentKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-  try {
-    const stored = localStorage.getItem(API_KEY_STORAGE_KEY);
-    if (stored !== null) {
-      return stored && isValidApiKeyFormat(stored) ? stored : '';
-    }
-  } catch {
-    // Continue with the build-time key when browser storage is unavailable.
-  }
-  return isValidApiKeyFormat(environmentKey) ? environmentKey : '';
+let activeApiKey = '';
+
+// Remove keys saved by older versions. Client-side storage is readable by page scripts.
+try {
+  globalThis.localStorage?.removeItem(LEGACY_API_KEY_STORAGE_KEY);
+} catch {
+  // Storage may be disabled; API key handling remains memory-only either way.
+}
+
+export function getApiKey(): string {
+  return activeApiKey;
 }
 
 export function saveApiKey(key: string): boolean {
-  try {
-    const trimmed = key.trim();
-    if (!trimmed) {
-      // An empty override also lets a user disable a build-time VITE key.
-      localStorage.setItem(API_KEY_STORAGE_KEY, '');
-      return true;
-    }
-    if (isValidApiKeyFormat(trimmed)) {
-      localStorage.setItem(API_KEY_STORAGE_KEY, trimmed);
-      return true;
-    } else {
-      console.warn('Attempted to save invalid API key format');
-      return false;
-    }
-  } catch (e) {
-    console.error('Failed to save API key to localStorage', e);
+  const trimmed = key.trim();
+  if (trimmed && !isValidApiKeyFormat(trimmed)) {
     return false;
   }
+
+  activeApiKey = trimmed;
+  return true;
 }
 
 /**
@@ -89,7 +80,7 @@ export async function generateAiEventPlan(
   details: EventDetails,
   customInstructions?: string
 ): Promise<{ plan: FullEventPlan; source: 'gemini' | 'heuristic' }> {
-  const apiKey = getStoredApiKey();
+  const apiKey = getApiKey();
 
   // If no API key is provided, gracefully use the heuristic intelligence engine
   if (!apiKey) {
@@ -181,7 +172,7 @@ CRITICAL: Return ONLY a valid JSON object matching this structure with no conver
 
   try {
     const response = await fetchWithTimeout(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+      GEMINI_GENERATE_CONTENT_URL,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', [API_KEY_HEADER]: apiKey },
@@ -189,6 +180,7 @@ CRITICAL: Return ONLY a valid JSON object matching this structure with no conver
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.4,
+            maxOutputTokens: 8192,
             responseMimeType: 'application/json',
           },
         }),
@@ -250,7 +242,7 @@ export async function sendChatMessage(
     return "Please enter a valid message.";
   }
 
-  const apiKey = getStoredApiKey();
+  const apiKey = getApiKey();
 
   // If no API key, use context-aware smart response engine
   if (!apiKey) {
@@ -280,7 +272,7 @@ Answer the user's question clearly, constructively, and formatted in clean markd
     ];
 
     const response = await fetchWithTimeout(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+      GEMINI_GENERATE_CONTENT_URL,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', [API_KEY_HEADER]: apiKey },

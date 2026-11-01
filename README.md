@@ -2,7 +2,7 @@
 > An intelligent, context-aware GenAI planning assistant that empowers organizers to seamlessly coordinate **Weddings**, **Birthdays**, and **Community Events** with automated dynamic budgets, chronological timelines, vendor checklists, accessibility audits, and personalized creative concepts.
 
 [![Build Status](https://img.shields.io/badge/Build-Passing-emerald?style=flat-square&logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Tests-40%20Passed-indigo?style=flat-square&logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-47%20Passed-indigo?style=flat-square&logo=vitest)](https://vitest.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ES2022-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-slate?style=flat-square)](LICENSE)
 [![Branch](https://img.shields.io/badge/Branch-main-green?style=flat-square&logo=git)](https://github.com/)
@@ -48,7 +48,7 @@ flowchart TD
    - If a wedding plan is under \$50/guest or a community event is under \$10/attendee, Planora triggers intelligent advisory warnings with tailored cost-cutting strategies (e.g. buffet vs. plated, digital RSVPs, BYOB venues, municipal sponsorship).
 
 3. **Dual-Core AI Architecture (Live Gemini + Offline Heuristic Fallback)**:
-   - **Google Gemini API**: Connects to `gemini-2.0-flash` for open-ended creative reasoning and interactive conversational chats.
+   - **Google Gemini API**: Connects to the stable `gemini-3.8-flash` model for structured event plans and interactive chat.
    - **Zero-Key Heuristic Fallback**: Generates a local plan when no API key is configured. Live Gemini responses require an API key and network access.
 
 ---
@@ -77,7 +77,7 @@ flowchart TD
 
 ## 5. Security & Responsible Implementation
 - **Input Handling**: User text is length-bounded and sanitized. The interface renders it as React text rather than raw HTML.
-- **API Key Handling**: User-entered keys are stored in browser storage and sent directly to Google in the `x-goog-api-key` header. A `VITE_GEMINI_API_KEY` is compiled into the public client bundle; use only a restricted key and do not use it for a production secret.
+- **API Key Handling**: User-entered keys remain in page memory until reload and are sent directly to Google in the `x-goog-api-key` header. The application does not embed build-time API keys in the public client bundle.
 - **Deployment Headers**: Vercel serves a restrictive Content Security Policy and standard browser security headers, including frame protection and MIME sniffing protection.
 - **Resource Protection**: Bounded request token limits and client-side defensive checks prevent excessive memory consumption or infinite loops.
 - **Content Moderation**: Prompt guidelines ensure safe, respectful, and inclusive event planning dialogue.
@@ -97,6 +97,7 @@ The codebase includes an automated test suite powered by **Vitest**:
 - Input validation & edge cases (negative budgets, empty titles, overflow guest counts)
 - XSS tag sanitization tests
 - Budget distribution algorithms across all 3 verticals
+- Budget item sanitization, limits, edits, deletion, payment transitions, and total calculations
 - Chronological timeline ordering & day-of run-of-show verification
 - Vendor questionnaire generation & contract red flags
 - Personalized theme generation & hex code validity
@@ -127,10 +128,8 @@ cd <YOUR_REPOSITORY_NAME>
 # 2. Install dependencies
 npm install
 
-# 3. (Optional) Configure Gemini API Key
-cp .env.example .env
-# For local development only: VITE_ values are exposed in the browser bundle.
-# For production, use a restricted key entered by the user or a server-side proxy.
+# 3. (Optional) Enter a Gemini API key in the app
+# The key is held in memory for this page session and is not written to browser storage.
 
 # 4. Launch local development server
 npm run dev

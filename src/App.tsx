@@ -13,7 +13,7 @@ import {
 import type { FullEventPlan, CurrencyCode, BudgetItem, TimelineTask, VendorItem } from './types/event';
 import { loadSavedPlan, savePlanToStorage } from './services/storage';
 import { getPresetPlan } from './data/presetTemplates';
-import { getStoredApiKey } from './services/geminiApi';
+import { getApiKey } from './services/geminiApi';
 import { exportFullPlanToJson } from './services/exportUtils';
 import { useToast } from './hooks/useToast';
 import type { EventSectionId } from './types/navigation';
@@ -44,7 +44,7 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<EventSectionId>('overview');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(!!getStoredApiKey());
+  const [hasApiKey, setHasApiKey] = useState(!!getApiKey());
   const { message: toastMessage, show: showToast } = useToast();
 
   useEffect(() => {
