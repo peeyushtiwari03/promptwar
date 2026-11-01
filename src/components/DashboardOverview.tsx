@@ -14,13 +14,14 @@ import {
   TrendingUp,
   Lightbulb
 } from 'lucide-react';
-import { FullEventPlan } from '../types/event';
+import type { FullEventPlan } from '../types/event';
+import type { EventSectionId } from '../types/navigation';
 import { formatCurrency, formatDate, calculateCountdown } from '../utils/formatters';
 import { analyzeBudgetFeasibility } from '../utils/validation';
 
 interface DashboardOverviewProps {
   plan: FullEventPlan;
-  onNavigateTab: (tab: string) => void;
+  onNavigateTab: (tab: EventSectionId) => void;
   onOpenWizard: () => void;
 }
 

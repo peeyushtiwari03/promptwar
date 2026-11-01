@@ -6,7 +6,7 @@ import {
   Sparkles,
   Users 
 } from 'lucide-react';
-import { EventType, CurrencyCode } from '../types/event';
+import type { EventType, CurrencyCode } from '../types/event';
 import { PRESET_EVENTS } from '../data/presetTemplates';
 
 interface NavbarProps {

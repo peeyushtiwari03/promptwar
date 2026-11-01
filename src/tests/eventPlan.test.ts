@@ -17,11 +17,11 @@ import {
   isValidApiKeyFormat, 
   validateAndSanitizePlan 
 } from '../utils/validation';
-import { formatCurrency, formatDate, calculateCountdown } from '../utils/formatters';
+import { addDaysToCalendarDate, formatCurrency, formatDate, calculateCountdown } from '../utils/formatters';
 import { extractJsonFromText, getStoredApiKey, saveApiKey, generateOfflineChatResponse, generateAiEventPlan, sendChatMessage } from '../services/geminiApi';
 import { loadSavedPlan, savePlanToStorage, clearSavedPlan, PLAN_STORAGE_KEY } from '../services/storage';
 import { sanitizeFileName, generateBudgetCsvString } from '../services/exportUtils';
-import { BudgetItem, EventDetails } from '../types/event';
+import type { BudgetItem, EventDetails } from '../types/event';
 import { EventWizardModal } from '../components/EventWizardModal';
 import { AccessibilityHub } from '../components/AccessibilityHub';
 import { VendorChecklist } from '../components/VendorChecklist';
@@ -426,6 +426,13 @@ describe('Formatting Utilities', () => {
     expect(formatted).toContain('2026');
     expect(formatted).toContain('Nov');
     expect(formatDate('2026-02-30')).toBe('2026-02-30');
+  });
+
+  it('shifts valid calendar dates across month, leap-year, and year boundaries', () => {
+    expect(addDaysToCalendarDate('2024-03-01', -1)).toBe('2024-02-29');
+    expect(addDaysToCalendarDate('2026-12-31', 1)).toBe('2027-01-01');
+    expect(() => addDaysToCalendarDate('2026-02-30', 1)).toThrow(RangeError);
+    expect(() => addDaysToCalendarDate('2026-11-01', 1.5)).toThrow(RangeError);
   });
 
   it('computes countdown accurately for future, today, past and missing dates', () => {

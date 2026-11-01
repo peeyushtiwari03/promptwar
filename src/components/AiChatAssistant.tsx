@@ -10,7 +10,7 @@ import {
   Clock,
   ShieldAlert
 } from 'lucide-react';
-import { ChatMessage, FullEventPlan } from '../types/event';
+import type { ChatMessage, FullEventPlan } from '../types/event';
 import { sendChatMessage } from '../services/geminiApi';
 
 interface AiChatAssistantProps {
@@ -120,6 +120,7 @@ How can I help optimize your event today? You can ask me to adjust budgets, gene
           onClick={handleClearChat}
           className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors text-xs flex items-center gap-1"
           title="Reset Chat Session"
+          aria-label="Reset chat session"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span className="hidden sm:inline text-[11px]">Clear</span>

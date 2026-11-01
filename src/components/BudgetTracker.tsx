@@ -8,7 +8,7 @@ import {
   AlertCircle, 
   CheckCircle2
 } from 'lucide-react';
-import { BudgetItem, BudgetCategory, PaymentStatus, CurrencyCode } from '../types/event';
+import type { BudgetItem, BudgetCategory, PaymentStatus, CurrencyCode } from '../types/event';
 import { formatCurrency } from '../utils/formatters';
 import { exportBudgetToCsv } from '../services/exportUtils';
 import { sanitizeText } from '../utils/validation';
@@ -546,6 +546,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
                           onClick={() => startEdit(item)}
                           className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-md hover:bg-slate-100"
                           title="Edit Item"
+                          aria-label={`Edit expense: ${item.name}`}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -553,6 +554,7 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
                           onClick={() => handleDeleteItem(item.id)}
                           className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md hover:bg-slate-100"
                           title="Delete Item"
+                          aria-label={`Delete expense: ${item.name}`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

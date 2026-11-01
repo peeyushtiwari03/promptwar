@@ -1,16 +1,15 @@
 import type { EventDetails, TimelineTask } from '../types/event';
+import { addDaysToCalendarDate } from '../utils/formatters';
 
 export function generateTimelineTasks(details: EventDetails): TimelineTask[] {
   const type = details.type;
-  const eventDate = details.date || '2026-10-31';
+  const eventDate = details.date;
 
   const tasks: TimelineTask[] = [];
 
   // Helper to adjust date
   const subtractDays = (days: number) => {
-    const d = new Date(eventDate);
-    d.setDate(d.getDate() - days);
-    return d.toISOString().split('T')[0];
+    return addDaysToCalendarDate(eventDate, -days);
   };
 
   if (type === 'wedding') {

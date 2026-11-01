@@ -1,4 +1,4 @@
-import { FullEventPlan, BudgetItem } from '../types/event';
+import type { FullEventPlan, BudgetItem } from '../types/event';
 import { sanitizeForCsv } from '../utils/validation';
 
 /**

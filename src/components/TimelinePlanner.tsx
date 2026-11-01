@@ -6,7 +6,7 @@ import {
   Check
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { TimelineTask, TaskPhase, TaskPriority, TaskStatus } from '../types/event';
+import type { TimelineTask, TaskPhase, TaskPriority, TaskStatus } from '../types/event';
 import { formatDate } from '../utils/formatters';
 import { sanitizeText } from '../utils/validation';
 
@@ -83,7 +83,11 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
               spread: 60,
               origin: { y: 0.7 },
             });
-          } catch {}
+          } catch (error) {
+            if (import.meta.env.DEV) {
+              console.warn('Could not show the task completion animation.', error);
+            }
+          }
         }
         return { ...task, status: nextStatus };
       }
@@ -397,6 +401,7 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
                     onClick={() => handleDeleteTask(task.id)}
                     className="p-1.5 text-slate-300 hover:text-rose-600 rounded-md hover:bg-slate-100 transition-colors"
                     title="Delete milestone"
+                    aria-label={`Delete milestone: ${task.title}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

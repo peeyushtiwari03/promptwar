@@ -3,7 +3,7 @@
  * Comprehensive defense against XSS, CSV injection, prototype pollution, and malformed payloads.
  */
 
-import {
+import type {
   FullEventPlan,
   BudgetItem,
   TimelineTask,

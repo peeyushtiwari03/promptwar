@@ -1,4 +1,4 @@
-import { CurrencyCode } from '../types/event';
+import type { CurrencyCode } from '../types/event';
 
 export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
   USD: '$',
@@ -33,6 +33,19 @@ export function formatDate(dateStr: string): string {
   } catch {
     return dateStr;
   }
+}
+
+export function addDaysToCalendarDate(value: string, dayOffset: number): string {
+  const date = parseLocalCalendarDate(value);
+  if (!date || !Number.isInteger(dayOffset)) {
+    throw new RangeError('A valid calendar date and whole-number day offset are required.');
+  }
+
+  date.setDate(date.getDate() + dayOffset);
+  const year = String(date.getFullYear()).padStart(4, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export interface CountdownResult {

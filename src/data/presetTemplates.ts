@@ -1,4 +1,4 @@
-import { EventDetails } from '../types/event';
+import type { EventDetails } from '../types/event';
 import { generateEventPlan } from '../services/heuristicEngine';
 
 export const PRESET_EVENTS: EventDetails[] = [
@@ -6,7 +6,7 @@ export const PRESET_EVENTS: EventDetails[] = [
     id: 'preset-wedding-1',
     title: 'Serenade in the Pines Wedding',
     type: 'wedding',
-    date: '2026-10-18',
+    date: '2027-10-18',
     location: 'Pinecrest Mountain Haven, CA',
     guestCount: 125,
     totalBudget: 32000,
@@ -34,7 +34,7 @@ export const PRESET_EVENTS: EventDetails[] = [
     id: 'preset-community-1',
     title: 'Oakwood Harvest Eco-Fair & 5K',
     type: 'community',
-    date: '2026-10-31',
+    date: '2027-10-31',
     location: 'Oakwood Community Central Park',
     guestCount: 400,
     totalBudget: 9500,

@@ -109,7 +109,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
               <span>Offline Intelligence Ready</span>
             </div>
             <p>
-              Planora works <strong>100% out-of-the-box</strong> using our algorithmic heuristic engine even without an API key!
+              Planora can build a local heuristic plan without an API key. Live Gemini responses require a key and an internet connection.
             </p>
             <p className="text-slate-600">
               Adding a Gemini API key unlocks unconstrained real-time responses and live conversational reasoning with <code>gemini-2.0-flash</code>.

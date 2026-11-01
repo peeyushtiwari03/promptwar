@@ -10,11 +10,13 @@ import {
   Download,
   Check
 } from 'lucide-react';
-import { FullEventPlan, CurrencyCode, BudgetItem, TimelineTask, VendorItem } from './types/event';
+import type { FullEventPlan, CurrencyCode, BudgetItem, TimelineTask, VendorItem } from './types/event';
 import { loadSavedPlan, savePlanToStorage } from './services/storage';
 import { getPresetPlan } from './data/presetTemplates';
 import { getStoredApiKey } from './services/geminiApi';
 import { exportFullPlanToJson } from './services/exportUtils';
+import { useToast } from './hooks/useToast';
+import type { EventSectionId } from './types/navigation';
 
 import { Navbar } from './components/Navbar';
 import { DashboardOverview } from './components/DashboardOverview';
@@ -27,22 +29,27 @@ import { AiChatAssistant } from './components/AiChatAssistant';
 import { EventWizardModal } from './components/EventWizardModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
 
+const tabs = [
+  { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
+  { id: 'budget', label: 'Budget & Expenses', icon: <DollarSign className="w-4 h-4" /> },
+  { id: 'timeline', label: 'Timeline & Schedule', icon: <Clock className="w-4 h-4" /> },
+  { id: 'vendors', label: 'Vendor Checklists', icon: <Users className="w-4 h-4" /> },
+  { id: 'ideas', label: 'Ideas & Themes', icon: <Sparkles className="w-4 h-4" /> },
+  { id: 'accessibility', label: 'Accessibility Audit', icon: <ShieldCheck className="w-4 h-4" /> },
+  { id: 'chat', label: 'AI Chat Assistant', icon: <MessageSquare className="w-4 h-4" /> },
+] satisfies ReadonlyArray<{ id: EventSectionId; label: string; icon: React.ReactNode }>;
+
 export const App: React.FC = () => {
   const [plan, setPlan] = useState<FullEventPlan>(loadSavedPlan);
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<EventSectionId>('overview');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(!!getStoredApiKey());
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { message: toastMessage, show: showToast } = useToast();
 
   useEffect(() => {
     savePlanToStorage(plan);
   }, [plan]);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
 
   const handleSelectPreset = (presetId: string) => {
     const newPlan = getPresetPlan(presetId);
@@ -88,16 +95,6 @@ export const App: React.FC = () => {
     exportFullPlanToJson(plan);
     showToast('Event plan JSON exported successfully.');
   };
-
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
-    { id: 'budget', label: 'Budget & Expenses', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'timeline', label: 'Timeline & Schedule', icon: <Clock className="w-4 h-4" /> },
-    { id: 'vendors', label: 'Vendor Checklists', icon: <Users className="w-4 h-4" /> },
-    { id: 'ideas', label: 'Ideas & Themes', icon: <Sparkles className="w-4 h-4" /> },
-    { id: 'accessibility', label: 'Accessibility Audit', icon: <ShieldCheck className="w-4 h-4" /> },
-    { id: 'chat', label: 'AI Chat Assistant', icon: <MessageSquare className="w-4 h-4" /> },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -251,8 +248,8 @@ export const App: React.FC = () => {
             <span>Smart event planning for weddings, birthdays, and community gatherings</span>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-slate-400">
-            <span>WCAG AA Accessible</span>
-            <span>Zero-Server Privacy</span>
+            <span>Keyboard and screen-reader support</span>
+            <span>Local-first plan storage</span>
             <span>© 2026 Planora</span>
           </div>
         </div>

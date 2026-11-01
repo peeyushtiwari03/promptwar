@@ -1,13 +1,13 @@
 import type { BudgetCategory, BudgetItem, EventDetails } from '../types/event';
 
 export function generateBudgetItems(details: EventDetails): BudgetItem[] {
-  const B = details.totalBudget;
-  const G = Math.max(1, details.guestCount);
-  const type = details.type;
+  const totalBudget = details.totalBudget;
+  const guestCount = Math.max(1, details.guestCount);
+  const eventType = details.type;
 
   let items: { cat: BudgetCategory; name: string; pct: number; notes: string }[] = [];
 
-  if (type === 'wedding') {
+  if (eventType === 'wedding') {
     items = [
       {
         cat: 'Venue & Rentals',
@@ -17,7 +17,7 @@ export function generateBudgetItems(details: EventDetails): BudgetItem[] {
       },
       {
         cat: 'Catering & Beverages',
-        name: `Catering (${G} guests @ ~$${Math.round((B * 0.28) / G)}/head)`,
+        name: `Catering (${guestCount} guests @ ~$${Math.round((totalBudget * 0.28) / guestCount)}/head)`,
         pct: 0.28,
         notes: 'Buffet or plated dinner, cocktail hour appetizers, and service staff.',
       },
@@ -64,7 +64,7 @@ export function generateBudgetItems(details: EventDetails): BudgetItem[] {
         notes: 'Reserved for unexpected guest additions, last-minute vendor tips, or weather tenting.',
       },
     ];
-  } else if (type === 'birthday') {
+  } else if (eventType === 'birthday') {
     items = [
       {
         cat: 'Venue & Rentals',
@@ -74,7 +74,7 @@ export function generateBudgetItems(details: EventDetails): BudgetItem[] {
       },
       {
         cat: 'Catering & Beverages',
-        name: `Food Spread & Finger Foods (${G} guests)`,
+        name: `Food Spread & Finger Foods (${guestCount} guests)`,
         pct: 0.32,
         notes: 'Custom catering or gourmet sliders, grazing table, and appetizers.',
       },
@@ -158,7 +158,7 @@ export function generateBudgetItems(details: EventDetails): BudgetItem[] {
   }
 
   return items.map((item, index) => {
-    const estimated = Math.round(B * item.pct);
+    const estimated = Math.round(totalBudget * item.pct);
     return {
       id: `budget-${index + 1}`,
       category: item.cat,

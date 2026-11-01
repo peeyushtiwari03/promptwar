@@ -3,7 +3,7 @@ import {
   Palette, 
   Tag, 
 } from 'lucide-react';
-import { PersonalizedIdea } from '../types/event';
+import type { PersonalizedIdea } from '../types/event';
 
 interface PersonalizedIdeasProps {
   ideas: PersonalizedIdea[];
@@ -104,6 +104,7 @@ export const PersonalizedIdeas: React.FC<PersonalizedIdeasProps> = ({
                         onClick={() => copyToClipboard(color.hex)}
                         className="group flex flex-col items-center cursor-pointer p-1 rounded-lg hover:bg-slate-50 transition-colors"
                         title={`Copy ${color.hex}`}
+                        aria-label={`Copy ${color.name} color ${color.hex}`}
                       >
                         <div
                           className="w-full h-9 rounded-md shadow-inner border border-black/10 group-hover:scale-105 transition-transform"

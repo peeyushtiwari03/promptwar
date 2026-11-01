@@ -9,7 +9,7 @@ import {
   Wand2,
   Loader2
 } from 'lucide-react';
-import { EventDetails, EventType, EventVibe, CurrencyCode, FullEventPlan } from '../types/event';
+import type { EventDetails, EventType, EventVibe, CurrencyCode, FullEventPlan } from '../types/event';
 import { validateEventInput, analyzeBudgetFeasibility, sanitizeText } from '../utils/validation';
 import { generateAiEventPlan } from '../services/geminiApi';
 import { useModalAccessibility } from '../hooks/useModalAccessibility';

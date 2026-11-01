@@ -10,7 +10,7 @@ import {
   ShieldAlert,
   Info
 } from 'lucide-react';
-import { AccessibilityCheckItem } from '../types/event';
+import type { AccessibilityCheckItem } from '../types/event';
 
 interface AccessibilityHubProps {
   items: AccessibilityCheckItem[];
@@ -75,7 +75,7 @@ export const AccessibilityHub: React.FC<AccessibilityHubProps> = ({
         <div className="space-y-1">
           <p className="font-semibold">Why Inclusive Event Design Matters:</p>
           <p className="text-blue-800 leading-relaxed">
-            Over 25% of attendees have dietary requirements, mobility preferences, or sensory sensitivities. Ensuring step-free access, clear allergen cards, and a quiet retreat zone prevents stress and guarantees every guest experiences celebration with dignity.
+            Attendees may have dietary requirements, mobility preferences, or sensory sensitivities. Planning step-free access, clear allergen cards, and a quiet retreat zone can make the event more welcoming.
           </p>
         </div>
       </div>

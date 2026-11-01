@@ -9,7 +9,7 @@ import {
   ShieldAlert,
   MessageSquare
 } from 'lucide-react';
-import { VendorItem, VendorStatus, CurrencyCode } from '../types/event';
+import type { VendorItem, VendorStatus, CurrencyCode } from '../types/event';
 import { formatCurrency } from '../utils/formatters';
 
 interface VendorChecklistProps {

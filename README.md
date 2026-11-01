@@ -15,7 +15,7 @@
 - **AI Persona**: **Planora** — An empathetic, proactive, and elite AI Event Director with deep expertise across hospitality, municipal logistics, vendor contract negotiations, and creative aesthetic design.
 
 ### Why This Vertical Matters
-Event organizing is notoriously high-stress, prone to budget overruns (avg. 28% variance), fragmented checklists, and overlooked accessibility needs. **Planora AI** acts as a dynamic co-planner that translates high-level user visions into actionable, mathematically balanced, and chronologically phased roadmaps.
+Event organizing can involve budget pressure, fragmented checklists, and overlooked accessibility needs. **Planora AI** acts as a co-planner that translates user goals into actionable budgets, timelines, and checklists.
 
 ---
 
@@ -49,7 +49,7 @@ flowchart TD
 
 3. **Dual-Core AI Architecture (Live Gemini + Offline Heuristic Fallback)**:
    - **Google Gemini API**: Connects to `gemini-2.0-flash` for open-ended creative reasoning and interactive conversational chats.
-   - **Zero-Key Heuristic Fallback**: Includes a robust heuristic planning engine that automatically generates high-fidelity plans offline if no API key is provided, ensuring **100% evaluation reliability and zero vendor lock-in**.
+   - **Zero-Key Heuristic Fallback**: Generates a local plan when no API key is configured. Live Gemini responses require an API key and network access.
 
 ---
 
@@ -59,7 +59,7 @@ flowchart TD
 |---|---|---|
 | 🎯 **Dashboard Overview** | Real-time countdown timer, budget variance gauge, task completion ring, and feasibility diagnostics. | High-level situational awareness at a glance. |
 | 💰 **Budget & Expense Tracker** | Dynamic category breakdowns, estimated vs. actual expenses, payment status toggling (`Planned`, `Deposit Paid`, `Paid In Full`), CSV export. | Eliminates hidden fees and prevents budget overruns. |
-| ⏱️ **Chronological Milestones & Run-of-Show** | Grouped by 5 chronological phases: *Early Planning*, *Vendor Booking*, *Details/RSVPs*, *Final Countdown (1-2 Weeks)*, and minute-by-minute *Day-Of Run of Show*. Features celebratory confetti upon completion! | Guarantees critical items are never missed before the big day. |
+| ⏱️ **Chronological Milestones & Run-of-Show** | Grouped by 5 chronological phases: *Early Planning*, *Vendor Booking*, *Details/RSVPs*, *Final Countdown (1-2 Weeks)*, and minute-by-minute *Day-Of Run of Show*. Features celebratory confetti upon completion. | Helps organizers track important tasks before and during the event. |
 | 🤝 **Vendor Checklists & Matrix** | Categorized vendor cards with status pipeline, diligence checklists, **tailored interview questions**, and **contract red flags**. | Equips non-professionals to negotiate like seasoned event planners. |
 | 🎨 **Personalized Ideas & Themes** | Curated aesthetic moodboards with **one-click copyable HEX color palettes**, signature food and craft mocktail recipes, interactive icebreaker games, and late-night food stations. | Delivers bespoke event identity without expensive styling agencies. |
 | ♿ **Accessibility & Inclusivity Audit** | Checklist covering step-free physical access, dietary allergy labeling, sensory quiet retreat spaces, large-print signage, and hydration stations with live score. | Ensures events are welcoming and dignified for all attendees. |
@@ -69,9 +69,9 @@ flowchart TD
 
 ## 4. Assumptions Made
 1. **Target User**: Intended for independent organizers, couples, birthday celebrants, or community volunteers who lack formal event planning training and need structured guidance.
-2. **Pricing Benchmarks**: Default heuristic cost allocations reflect realistic North American & international averages for independent venues and vendors.
+2. **Budget Templates**: Default category percentages are editable planning starting points. Actual prices depend on location, date, guest count, and vendor choices.
 3. **Data Privacy**: Event plans are stored in the browser. If a user enables live Gemini features, the relevant event context and API key are sent directly to Google's API; Planora does not proxy those requests.
-4. **Network Resilience**: Full functionality (all calculators, plans, mockups, filters, and offline chats) works completely without internet access or API credentials.
+4. **Network Resilience**: Heuristic planning and offline chat work without a Gemini API key after the app is loaded. Live Gemini responses require a network connection and API key.
 
 ---
 
@@ -84,11 +84,11 @@ flowchart TD
 
 ---
 
-## 6. Accessibility (WCAG AA Compliance)
+## 6. Accessibility
 - **Semantic HTML5**: Native `<header>`, `<main>`, `<nav>`, `<section>`, and `<footer>` elements.
-- **High Contrast**: Meets WCAG AA contrast standards for dark-on-light text readability.
+- **Contrast and Motion**: Uses high-contrast text and honors reduced-motion preferences. The project has not undergone an independent WCAG conformance audit.
 - **Keyboard Navigation**: Full focus state management, keyboard-selectable dropdowns, and ARIA roles (`role="tab"`, `aria-selected`, `aria-label`).
-- **Screen Reader Readiness**: Live region alerts and semantic button labelling across all interactive toggles.
+- **Screen Reader Support**: Live-region alerts, semantic labels, and native controls across interactive features.
 
 ---
 
@@ -104,8 +104,10 @@ The codebase includes an automated test suite powered by **Vitest**:
 
 To run tests:
 ```bash
-npm test
+npm run check
 ```
+
+The `check` script runs the production build and automated test suite. You can run either step by itself with `npm run build` or `npm test`. GitHub Actions runs the combined check for pushes and pull requests.
 
 ---
 
@@ -145,5 +147,4 @@ npm run build
 ## 9. Repository Compliance & Submission Notes
 - **Repository Size**: Under **2 MB** (well below the 10 MB competition limit).
 - **Git Branch**: Exactly **one branch** (`main`).
-- **Attempts**: Attempt 1 of 3.
 - **License**: MIT.

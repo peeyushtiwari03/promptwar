@@ -1,4 +1,4 @@
-import { EventDetails, FullEventPlan, ChatMessage } from '../types/event';
+import type { EventDetails, FullEventPlan, ChatMessage } from '../types/event';
 import { generateEventPlan } from './heuristicEngine';
 import { isValidApiKeyFormat, sanitizeText, validateAndSanitizePlan } from '../utils/validation';
 

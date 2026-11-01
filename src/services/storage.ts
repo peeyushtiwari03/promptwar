@@ -1,4 +1,4 @@
-import { FullEventPlan } from '../types/event';
+import type { FullEventPlan } from '../types/event';
 import { PRESET_EVENTS, getPresetPlan } from '../data/presetTemplates';
 import { validateAndSanitizePlan } from '../utils/validation';
 
