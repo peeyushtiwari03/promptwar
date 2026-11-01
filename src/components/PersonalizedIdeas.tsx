@@ -1,11 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Palette, 
-  Utensils, 
   Tag, 
-  Lightbulb 
 } from 'lucide-react';
-import { PersonalizedIdea, ColorSwatch } from '../types/event';
+import { PersonalizedIdea } from '../types/event';
 
 interface PersonalizedIdeasProps {
   ideas: PersonalizedIdea[];
@@ -41,7 +39,7 @@ export const PersonalizedIdeas: React.FC<PersonalizedIdeasProps> = ({
             Curated Themes, Menus & Creative Concepts
           </h2>
           <p className="text-xs text-slate-500">
-            Curated themes, menus, and creative concepts for your event
+            Ideas tailored for {eventTitle}
           </p>
         </div>
 

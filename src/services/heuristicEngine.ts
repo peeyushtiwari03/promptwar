@@ -14,7 +14,7 @@ export function generateEventPlan(details: EventDetails): FullEventPlan {
   const timeline = generateTimelineTasks(details);
   const vendors = generateVendorItems(details);
   const ideas = generatePersonalizedIdeas(details);
-  const accessibility = generateAccessibilityItems(details);
+  const accessibility = generateAccessibilityItems();
 
   return {
     details,
@@ -801,7 +801,7 @@ export function generateVendorItems(details: EventDetails): VendorItem[] {
 /* -------------------------------------------------------------------------- */
 export function generatePersonalizedIdeas(details: EventDetails): PersonalizedIdea[] {
   const type = details.type;
-  const vibe = details.vibe;
+  const vibeLabel = details.vibe.replace(/-/g, ' ');
 
   if (type === 'wedding') {
     return [
@@ -810,7 +810,7 @@ export function generatePersonalizedIdeas(details: EventDetails): PersonalizedId
         category: 'theme',
         title: 'Enchanted Botanical & Modern Gold',
         description: 'Earthy warmth meets elevated contemporary romance. Rich forest greenery paired with soft warm candlelight and brushed brass metallics.',
-        tags: ['Elegant', 'Romantic', 'Timeless'],
+        tags: ['Elegant', 'Romantic', 'Timeless', vibeLabel],
         colorPalette: [
           { name: 'Emerald Forest', hex: '#1b4332' },
           { name: 'Sage Mist', hex: '#95d5b2' },
@@ -869,7 +869,7 @@ export function generatePersonalizedIdeas(details: EventDetails): PersonalizedId
         category: 'theme',
         title: 'Retro Neon Glow & Sunset Disco',
         description: 'Vibrant 80s/90s modern revival with electric pastels, neon typography, mirrored disco balls, and high-energy nostalgia.',
-        tags: ['Vibrant', 'High Energy', 'Instagrammable'],
+        tags: ['Vibrant', 'High Energy', 'Instagrammable', vibeLabel],
         colorPalette: [
           { name: 'Electric Magenta', hex: '#f72585' },
           { name: 'Neon Violet', hex: '#7209b7' },
@@ -915,7 +915,7 @@ export function generatePersonalizedIdeas(details: EventDetails): PersonalizedId
         category: 'theme',
         title: 'Green Roots Community Harmony & Eco-Festival',
         description: 'Focused on sustainability, community connection, local artisans, zero waste, and inclusive family fun under the open sky.',
-        tags: ['Eco-Friendly', 'Inclusive', 'Community-Building'],
+        tags: ['Eco-Friendly', 'Inclusive', 'Community-Building', vibeLabel],
         colorPalette: [
           { name: 'Living Green', hex: '#2d6a4f' },
           { name: 'Sunburst Gold', hex: '#e9c46a' },
@@ -958,7 +958,7 @@ export function generatePersonalizedIdeas(details: EventDetails): PersonalizedId
 /* -------------------------------------------------------------------------- */
 /* ACCESSIBILITY & INCLUSIVITY CHECKLIST                                      */
 /* -------------------------------------------------------------------------- */
-export function generateAccessibilityItems(details: EventDetails): AccessibilityCheckItem[] {
+export function generateAccessibilityItems(): AccessibilityCheckItem[] {
   return [
     {
       id: 'acc-1',

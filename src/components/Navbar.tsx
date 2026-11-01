@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   Calendar,
   PlusCircle, 
-  RotateCcw, 
   PartyPopper, 
   Sparkles,
   Users 
@@ -18,7 +17,6 @@ interface NavbarProps {
   onOpenWizard: () => void;
   onOpenApiKeyModal: () => void;
   onChangeCurrency: (currency: CurrencyCode) => void;
-  onReset: () => void;
   hasApiKey: boolean;
 }
 
@@ -30,7 +28,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenWizard,
   onOpenApiKeyModal,
   onChangeCurrency,
-  onReset,
   hasApiKey,
 }) => {
   const getEventBadge = () => {

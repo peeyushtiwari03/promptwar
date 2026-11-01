@@ -294,7 +294,7 @@ describe('Heuristic AI Generation Engine for Verticals', () => {
   });
 
   it('should generate comprehensive accessibility & inclusivity checklist', () => {
-    const acc = generateAccessibilityItems(communityDetails);
+    const acc = generateAccessibilityItems();
     expect(acc.length).toBeGreaterThan(3);
     const categories = acc.map((a) => a.category);
     expect(categories).toContain('physical');

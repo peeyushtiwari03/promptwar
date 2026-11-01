@@ -5,11 +5,7 @@ import {
   PartyPopper, 
   Users, 
   Calendar, 
-  DollarSign, 
-  MapPin, 
   AlertTriangle,
-  HeartHandshake,
-  Check,
   Wand2,
   Loader2
 } from 'lucide-react';

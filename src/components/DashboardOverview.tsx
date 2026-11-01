@@ -33,15 +33,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const countdown = calculateCountdown(details.date);
 
   // Financial Calculations
-  const { totalEstimated, totalActual, remainingBudget, isOverBudget } = useMemo(() => {
-    let est = 0;
+  const { totalActual, remainingBudget, isOverBudget } = useMemo(() => {
     let act = 0;
     for (const item of budget) {
-      est += Number(item.estimatedCost) || 0;
       act += Number(item.actualCost) || 0;
     }
     return {
-      totalEstimated: est,
       totalActual: act,
       remainingBudget: details.totalBudget - act,
       isOverBudget: act > details.totalBudget,

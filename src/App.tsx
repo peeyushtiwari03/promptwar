@@ -118,7 +118,6 @@ export const App: React.FC = () => {
         onOpenWizard={() => setIsWizardOpen(true)}
         onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
         onChangeCurrency={handleChangeCurrency}
-        onReset={() => handleSelectPreset('preset-wedding-1')}
         hasApiKey={hasApiKey}
       />
 

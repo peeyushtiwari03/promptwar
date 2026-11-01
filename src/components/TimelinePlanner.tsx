@@ -1,15 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Clock, 
-  Calendar, 
-  CheckCircle2, 
-  Circle, 
-  AlertCircle, 
   Plus, 
   Trash2, 
-  Check, 
-  Filter, 
-  ListOrdered
+  Check
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { TimelineTask, TaskPhase, TaskPriority, TaskStatus } from '../types/event';
@@ -37,7 +31,6 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
   onUpdateTimeline,
 }) => {
   const [selectedPhase, setSelectedPhase] = useState<TaskPhase | 'all'>('all');
-  const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [isAddingTask, setIsAddingTask] = useState(false);
 
   // Form State
@@ -68,10 +61,9 @@ export const TimelinePlanner: React.FC<TimelinePlannerProps> = ({
   const filteredTasks = useMemo(() => {
     return timeline.filter((task) => {
       const phaseMatch = selectedPhase === 'all' || task.phase === selectedPhase;
-      const priorityMatch = selectedPriority === 'all' || task.priority === selectedPriority;
-      return phaseMatch && priorityMatch;
+      return phaseMatch;
     });
-  }, [timeline, selectedPhase, selectedPriority]);
+  }, [timeline, selectedPhase]);
 
   const handleToggleTaskStatus = (id: string) => {
     const nextStatusMap: Record<TaskStatus, TaskStatus> = {

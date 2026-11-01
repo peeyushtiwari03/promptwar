@@ -1,16 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Users, 
-  HelpCircle, 
   AlertTriangle, 
   CheckSquare, 
   Square, 
-  Phone, 
-  Mail, 
-  Plus, 
   ChevronDown, 
   ChevronUp, 
-  DollarSign,
   ShieldAlert,
   MessageSquare
 } from 'lucide-react';

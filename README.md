@@ -145,5 +145,3 @@ npm run build
 - **Git Branch**: Exactly **one branch** (`main`).
 - **Attempts**: Attempt 1 of 3.
 - **License**: MIT.
-#   E v e n t - P l a n n e r  
- 

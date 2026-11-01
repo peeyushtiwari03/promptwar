@@ -6,9 +6,7 @@ import {
   Edit2, 
   Download, 
   AlertCircle, 
-  CheckCircle2, 
-  PieChart, 
-  ArrowUpDown
+  CheckCircle2
 } from 'lucide-react';
 import { BudgetItem, BudgetCategory, PaymentStatus, CurrencyCode } from '../types/event';
 import { formatCurrency } from '../utils/formatters';
@@ -64,22 +62,15 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
     notes: '',
   });
 
-  const { totalEstimated, totalActual, remaining, isOverBudget, categoryTotals } = useMemo(() => {
+  const { totalEstimated, totalActual, remaining, isOverBudget } = useMemo(() => {
     let est = 0;
     let act = 0;
-    const totals: Record<string, { estimated: number; actual: number }> = {};
 
     for (const item of budget) {
       const e = Number(item.estimatedCost) || 0;
       const a = Number(item.actualCost) || 0;
       est += e;
       act += a;
-
-      if (!totals[item.category]) {
-        totals[item.category] = { estimated: 0, actual: 0 };
-      }
-      totals[item.category].estimated += e;
-      totals[item.category].actual += a;
     }
 
     return {
@@ -87,7 +78,6 @@ export const BudgetTracker: React.FC<BudgetTrackerProps> = ({
       totalActual: act,
       remaining: totalBudget - act,
       isOverBudget: act > totalBudget,
-      categoryTotals: totals,
     };
   }, [budget, totalBudget]);
 
